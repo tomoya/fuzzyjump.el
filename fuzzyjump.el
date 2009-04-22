@@ -1,19 +1,21 @@
 ;;; fuzzyjump.el --- Jump to where you (almost) want
 ;; -*- coding: utf-8; mode:emacs-lisp -*-
-
+;;
 ;; Copyright (C) 2008 Tomoya Otake
+;;
 ;; Author: Tomoya Otake <tomoya.ton@gmail.com>
+;; Version: 0.1
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published
 ;; by the Free Software Foundation; either version 2, or (at your
 ;; option) any later version.
-
+;;
 ;; This file is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
-
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs; see the file COPYING.  If not, write to the
 ;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -21,27 +23,29 @@
 
 ;; * Description
 ;;
-;; html-key-chord-mode is minor mode of Emacs that use key-chord.el.
-;; This mode can be coded very quickly.
-;;
+;; fuzzyjump-mode is minor mode of Emacs that use fuzzyjump.el.
+;; Jump to where you (almost) want.
+
 ;; * Usage
 ;;
-;; Just put the code like below into your .emacs:
+;; To use this extension, locate this file to load-path directory,
+;; and add the following code to your .emacs.
 ;;
-;; (require 'html-key-chord-mode)
-
-;; default keybinds
-;; (define-key map "\C-ct" 'quote-line-by)
-;; (define-key map "\M-t" 'quote-region-by)
-;; (define-key map "\C-cd" 'del-line-tag)
-;; (define-key map "\M-d" 'del-region-tag)
-
-;; If you want to change keybind, input your .emacs
-;; (define-key hkc-mode-map "\C-t" 'quote-line-by)
-
-
+;; (require 'fuzzyjump-mode)
+;; (fuzzyjump-mode t)
+;;
+;; Toggle this mode M-x fuzzyjump-mode
+;;
+;; Default prefix key "C-c C-j"
+;; You type "C-c C-j" after "1-0" or "q-p" or "a-l" or "z-." fuzzyjump!
+;;
+;; Enjoy!
 
 (defvar fuzzyjump-mode nil) ; mode 変数。これで状態判定
+
+(defvar fuzzyjump-prefix-key "C-c C-j"
+  "Prefix keystrokes for fuzzyjump minor-mode commands.")
+
 
 ;; mode 行の設定。なくてもOK。
 (if (not (assq 'fuzzyjump-mode minor-mode-alist))
@@ -80,7 +84,10 @@
 	 (setq move-line (* (/ (window-height) 4) line))
 	 (move-to-window-line move-line)))
   
-  (setq count-char-of-current-line (count-char-of-current-line))
+(setq count-char-of-current-line
+      (cond ((> (count-char-of-current-line) (window-width)) (- (window-width) 1))
+	    (t (count-char-of-current-line))))
+  
   (cond ((= char 0)
 	 (move-to-column 0))
 	((= char 9)
@@ -89,38 +96,58 @@
 	 (setq move-char (* (/ count-char-of-current-line 9) char))
 	 (move-to-column move-char))))
 
-
-(defvar fuzzyjump-prefix-key
-  "Prefix keystrokes for fuzzyjump minor-mode commands."
-  "C-1")
-
 (defvar fuzzyjump-mode-map (make-sparse-keymap "fuzzyjump"))
 (defvar fuzzyjump-cmd-map (make-sparse-keymap "fyzzyjump-cmd"))
 
-(defun fuzzyjump-mode-key-set (val)
+(defun fuzzyjump-mode-key-prefix-set (val)
   (define-key fuzzyjump-mode-map (read-kbd-macro val) fuzzyjump-cmd-map))
 
 (let ((map fuzzyjump-cmd-map))
-  (define-key map (kbd "1") (fuzzyn)
-  (define-key map (kbd "2") ')
-  (define-key map (kbd "3") 'egg-status)
-  (define-key map (kbd "4") 'egg-commit-log-edit)
-  (define-key map (kbd "5") 'egg-file-ediff)
-  (define-key map (kbd "6") 'egg-grep)
-  (define-key map (kbd "7") 'egg-file-stage-current-file)
-  (define-key map (kbd "8") 'egg-log)
-  (define-key map (kbd "9") 'egg-reflog)
-  (define-key map (kbd "h") 'egg-file-log)
-  (define-key map (kbd "o") 'egg-file-checkout-other-version)
-  (define-key map (kbd "s") 'egg-status)
-  (define-key map (kbd "u") 'egg-file-cancel-modifications)
-  (define-key map (kbd "v") 'egg-next-action)
-  (define-key map (kbd "w") 'egg-commit-log-edit)
-  (define-key map (kbd "/") 'egg-file-log-pickaxe)
-  (define-key map (kbd "=") 'egg-file-diff)
-  (define-key map (kbd "~") 'egg-file-version-other-window))
+  (define-key map (kbd "1") (lambda () (interactive) (fuzzyjump 0 0)))
+  (define-key map (kbd "2") (lambda () (interactive) (fuzzyjump 0 1)))
+  (define-key map (kbd "3") (lambda () (interactive) (fuzzyjump 0 2)))
+  (define-key map (kbd "4") (lambda () (interactive) (fuzzyjump 0 3)))
+  (define-key map (kbd "5") (lambda () (interactive) (fuzzyjump 0 4)))
+  (define-key map (kbd "6") (lambda () (interactive) (fuzzyjump 0 5)))
+  (define-key map (kbd "7") (lambda () (interactive) (fuzzyjump 0 6)))
+  (define-key map (kbd "8") (lambda () (interactive) (fuzzyjump 0 7)))
+  (define-key map (kbd "9") (lambda () (interactive) (fuzzyjump 0 8)))
+  (define-key map (kbd "0") (lambda () (interactive) (fuzzyjump 0 9)))
+  (define-key map (kbd "q") (lambda () (interactive) (fuzzyjump 1 0)))
+  (define-key map (kbd "w") (lambda () (interactive) (fuzzyjump 1 1)))
+  (define-key map (kbd "e") (lambda () (interactive) (fuzzyjump 1 2)))
+  (define-key map (kbd "r") (lambda () (interactive) (fuzzyjump 1 3)))
+  (define-key map (kbd "t") (lambda () (interactive) (fuzzyjump 1 4)))
+  (define-key map (kbd "y") (lambda () (interactive) (fuzzyjump 1 5)))
+  (define-key map (kbd "u") (lambda () (interactive) (fuzzyjump 1 6)))
+  (define-key map (kbd "i") (lambda () (interactive) (fuzzyjump 1 7)))
+  (define-key map (kbd "o") (lambda () (interactive) (fuzzyjump 1 8)))
+  (define-key map (kbd "p") (lambda () (interactive) (fuzzyjump 1 9)))
+  (define-key map (kbd "a") (lambda () (interactive) (fuzzyjump 2 0)))
+  (define-key map (kbd "s") (lambda () (interactive) (fuzzyjump 2 1)))
+  (define-key map (kbd "d") (lambda () (interactive) (fuzzyjump 2 2)))
+  (define-key map (kbd "f") (lambda () (interactive) (fuzzyjump 2 3)))
+  (define-key map (kbd "g") (lambda () (interactive) (fuzzyjump 2 4)))
+  (define-key map (kbd "h") (lambda () (interactive) (fuzzyjump 2 5)))
+  (define-key map (kbd "j") (lambda () (interactive) (fuzzyjump 2 6)))
+  (define-key map (kbd "k") (lambda () (interactive) (fuzzyjump 2 7)))
+  (define-key map (kbd "l") (lambda () (interactive) (fuzzyjump 2 9)))
+  (define-key map (kbd "z") (lambda () (interactive) (fuzzyjump 3 0)))
+  (define-key map (kbd "x") (lambda () (interactive) (fuzzyjump 3 1)))
+  (define-key map (kbd "c") (lambda () (interactive) (fuzzyjump 3 2)))
+  (define-key map (kbd "v") (lambda () (interactive) (fuzzyjump 3 3)))
+  (define-key map (kbd "b") (lambda () (interactive) (fuzzyjump 3 4)))
+  (define-key map (kbd "n") (lambda () (interactive) (fuzzyjump 3 5)))
+  (define-key map (kbd "m") (lambda () (interactive) (fuzzyjump 3 6)))
+  (define-key map (kbd ",") (lambda () (interactive) (fuzzyjump 3 7)))
+  (define-key map (kbd ".") (lambda () (interactive) (fuzzyjump 3 9))))
+
+(fuzzyjump-mode-key-prefix-set fuzzyjump-prefix-key)
+
+(or (assq 'fuzzyjump-mode-map minor-mode-map-alist)
+    (push (cons 'fuzzyjump-mode fuzzyjump-mode-map) minor-mode-map-alist))
 
 
-(provide 'fuzzyjump-mode)
+(provide 'fuzzyjump)
 
 ;;; fuzzyjump.el ends here
