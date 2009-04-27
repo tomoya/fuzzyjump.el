@@ -50,7 +50,7 @@
 ;; mode 行の設定。なくてもOK。
 (if (not (assq 'fuzzyjump-mode minor-mode-alist))
     (setq minor-mode-alist
-          (cons '(fuzzyjump-mode " fuzzy")
+          (cons '(fuzzyjump-mode " fuzzyJump")
                 minor-mode-alist)))
 
 ;; mode の On / Off をするための関数
